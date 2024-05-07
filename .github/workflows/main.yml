@@ -3,7 +3,7 @@ name: Data Harvester
 # https://github.com/peaceiris/actions-gh-pages
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   build:
