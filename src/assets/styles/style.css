@@ -1,0 +1,208 @@
+@font-face {
+  font-family: 'Roboto Flex';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 1000;
+  src: url("../fonts/RobotoFlex-VariableFont.woff2") format('woff2-variations');
+}
+
+/* + reset */
+* 
+{
+	margin:0; padding:0; outline: 0;
+    background:transparent;
+    vertical-align:baseline;
+
+    box-sizing: border-box;
+	-webkit-font-smoothing: antialiased;
+  	-moz-osx-font-smoothing: grayscale;
+}
+
+img {border: 0;}
+
+html {
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%; 
+    -ms-text-size-adjust: 100%; 
+}
+
+article,aside,details,figcaption,figure, footer,header,hgroup,menu,nav,section, main 
+{
+    display:block;
+}
+
+nav ul {list-style:none;}
+table {border-collapse:collapse; border-spacing:0;}
+input, select {vertical-align:middle;}
+
+sup { vertical-align: super; }
+sub { vertical-align: sub; }
+/* - reset */
+
+:root {
+  --app-color-blue: #028DF2;
+  --app-color-light: #fff;
+  --app-color-bluelight: #62BDFF;
+  --app-color-bluedark: #037AD0;
+  --app-color-green: #8BD414;
+  --app-color-red: #ff008c;
+  --app-color-dark: #333;
+  --app-color-gray: hsla(0, 0%, 80%, 1);
+  --app-color-darkest: #000;
+
+  --app-fontfamily: "Roboto Flex", "Roboto", system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --app-fontsize: 1rem;
+
+  --app-input-padding: 1rem;
+  --app-input-margin: 1rem;
+
+  font-family: var(--app-fontfamily);
+  font-size: var(--app-fontsize);
+  line-height: 1.2;
+  font-weight: 400;
+
+  color-scheme: light;
+  /* color: rgba(255, 255, 255, 0.87); */
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  box-sizing: border-box;
+}
+
+body {
+  position: relative;
+  min-width: 550px;
+  background-color: hsla(0, 0%, 80%, 1);
+  overflow: hidden;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media screen and (max-width: 550px) {
+  body {
+    position: fixed;
+  }
+}
+
+/* + containers */
+.container-narrow {
+  max-width: 450px;
+  width: 80vw;
+  margin: 0 auto;
+}
+/* - containers */
+
+/* + animations */
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes translateUp {
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .3;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2.5s linear 0.4s infinite;
+}
+/* - animations */
+
+/* + forms */
+select, input {
+  --input-border: var(--app-color-dark);
+  border: 1px solid var(--input-border);
+  border-radius: .2rem;
+  color: var(--app-color-dark);
+  padding: var(--app-input-padding);
+  padding-right: calc(var(--app-input-padding) * 1.5 + 0.5rem);
+  font-weight: bold;
+  font-size: calc(var(--app-fontsize) * 1.1);
+}
+
+input::placeholder {
+  font-weight: 300;
+  font-style: italic;
+}
+
+input:focus, select:focus {
+  --input-border: var(--app-color-blue);
+}
+
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background: transparent;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='black' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 12 19' style='enable-background:new 0 0 12 19;' xml:space='preserve'><path d='M6.8,0.3c-0.5-0.5-1.2-0.5-1.7,0L0.4,5.1c-0.5,0.5-0.5,1.2,0,1.7c0.5,0.5,1.2,0.5,1.7,0l4-3.9l4,3.9c0.5,0.5,1.2,0.5,1.7,0c0.5-0.5,0.5-1.2,0-1.7L6.8,0.3z M0.4,13.9l4.8,4.8c0.5,0.5,1.2,0.5,1.7,0l4.8-4.8c0.5-0.5,0.5-1.2,0-1.7c-0.5-0.5-1.2-0.5-1.7,0l-4,3.9l-4-3.9c-0.5-0.5-1.2-0.5-1.7,0C-0.1,12.7-0.1,13.4,0.4,13.9z'/></svg>");
+  background-repeat: no-repeat;
+  background-position-x: calc(100% - var(--app-input-padding) * 0.5);
+  background-position-y: 50%;
+  background-size: .5rem;
+}
+
+select:not(:last-child), input:not(:last-child) {
+  margin-bottom: var(--app-input-margin);
+}
+
+select:not(:disabled) {
+  cursor: pointer;
+}
+
+select:disabled, input:disabled {
+  --input-border: var(--app-color-gray);
+}
+
+select:disabled {
+  background-image: url("data:image/svg+xml;utf8,<svg fill='gray' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' x='0px' y='0px' viewBox='0 0 12 19' style='enable-background:new 0 0 12 19;' xml:space='preserve'><path d='M6.8,0.3c-0.5-0.5-1.2-0.5-1.7,0L0.4,5.1c-0.5,0.5-0.5,1.2,0,1.7c0.5,0.5,1.2,0.5,1.7,0l4-3.9l4,3.9c0.5,0.5,1.2,0.5,1.7,0c0.5-0.5,0.5-1.2,0-1.7L6.8,0.3z M0.4,13.9l4.8,4.8c0.5,0.5,1.2,0.5,1.7,0l4.8-4.8c0.5-0.5,0.5-1.2,0-1.7c-0.5-0.5-1.2-0.5-1.7,0l-4,3.9l-4-3.9c-0.5-0.5-1.2-0.5-1.7,0C-0.1,12.7-0.1,13.4,0.4,13.9z'/></svg>");
+
+}
+
+select.block, input.block {
+  display: block;
+  width: 100%;
+}
+
+form {
+  margin: var(--app-input-margin) 0;
+}
+
+.inputpassword {
+  position: relative;
+}
+
+.inputpassword-eye {
+  position: absolute;
+  width: 1rem;
+  top: calc(50% - .5rem);
+  right: var(--app-input-padding);
+  cursor: pointer;
+}
+
+.inputpassword-eye:hover {
+  fill: var(--app-color-blue)
+}
+/* - forms */
+
