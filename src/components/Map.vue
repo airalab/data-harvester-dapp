@@ -19,10 +19,10 @@
             :class="{'isActive': pointID === coordinate.id}"
             v-for="(coordinate, index) in coordinates" 
             :key="index" 
-            :style="{top: coordinate.y ? `${1152 - convertValues(coordinate.y)}px` : '', left: coordinate.x ? `${1192 - convertValues(coordinate.x)}px` : '', opacity: coordinate.signal && `${coordinate.signal}%`}" 
+            :style="{top: coordinate.y ? `${originY + convertValues(coordinate.y)}px` : '', left: coordinate.x ? `${originX +  convertValues(coordinate.x)}px` : '', opacity: coordinate.signal && `${coordinate.signal}%`}" 
             @click="getPoint($event, coordinate.id)"
           />
-        <img src="../assets/owlcat_map_3_edit.png" alt="office map" />
+        <img src="../assets/owlcat_map_5.png" alt="office map" />
       </div>
     </div>
   </PinchScrollZoom>
@@ -32,10 +32,10 @@
           :class="{'isActive': pointID === coordinate.id}"
           v-for="(coordinate, index) in coordinates" 
           :key="index" 
-          :style="{top: coordinate.y ? `${1152 - convertValues(coordinate.y)}px` : '', left: coordinate.x ? `${1192 - convertValues(coordinate.x)}px` : '', opacity: coordinate.signal && `${coordinate.signal}%`}" 
+          :style="{top: coordinate.y ? `${originY + convertValues(coordinate.y)}px` : '', left: coordinate.x ? `${originX +  convertValues(coordinate.x)}px` : '', opacity: coordinate.signal && `${coordinate.signal}%`}" 
           @click="getPoint($event, coordinate.id)"
         />
-      <img src="../assets/owlcat_map_3_edit.png" alt="office map" />
+      <img src="../assets/owlcat_map_5.png" alt="office map" />
     </div>
   </div>
 </template>
@@ -43,7 +43,7 @@
 
 <script setup>
   
-  import {defineEmits, ref} from 'vue'
+  import {defineEmits, ref, computed} from 'vue'
   import PinchScrollZoom from '@coddicat/vue-pinch-scroll-zoom';
 
   const emit = defineEmits(["getPointID"]);
@@ -72,6 +72,15 @@
     return value / 0.01;
   }
 
+    // getting origin coordinate
+    const originX = computed(() => {
+      return 11.285 / 0.01;
+    })
+
+    const originY = computed(() => {
+      return  3202 - 21.03 / 0.01;
+    })
+
   function onEvent(name, e) {
     state.eventName = name;
     state.eventData = e;
@@ -80,16 +89,6 @@
     state.originY = e.originY;
     state.translateX = e.translateX;
     state.translateY = e.translateY;
-}
-
-function reset() {
-  zoomer.value?.setData({
-    scale: 1,
-    originX: 150,
-    originY: 200,
-    translateX: -100,
-    translateY: -50
-  });
 }
 </script>
 

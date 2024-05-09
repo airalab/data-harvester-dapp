@@ -293,8 +293,8 @@ const closePointInfo = () => {
 
 const getAllCoordinates = (array, target) => {
   array.map(coordinate => {
-    let x = -coordinate.pose.robot_position.x;
-    let y = coordinate.pose.robot_position.y;
+    let x = coordinate.pose.robot_position.x;
+    let y = -coordinate.pose.robot_position.y;
     let id = coordinate.timestamp;
     let info = coordinate.esp_air_sensors;
 
@@ -313,8 +313,8 @@ const getWifiData = () => {
       obj.signal = w[k].signal
       obj.mac = k;
       obj.id = w.timestamp;
-      obj.x = -w.pose.robot_position.x;
-      obj.y = w.pose.robot_position.y;
+      obj.x = w.pose.robot_position.x;
+      obj.y = -w.pose.robot_position.y;
 
       if(obj.name) {
         wifiData.value.push(obj);
@@ -328,15 +328,15 @@ const getSpecificWifiCoordinates = () => {
   if(chosenNetwork.value) {
     newArr = wifiData.value.filter(d => d.name === chosenNetwork.value);
     wifiCoordinates.value = Object.values(newArr.reduce((acc, cur) => {
-    const key = `${cur.id}_${cur.name}`;
-    if (!acc[key]) {
-      acc[key] = cur;
-    }
-    if (acc[key].signal < cur.signal) {
-      acc[key].signal = cur.signal
-    }
-    return acc;
-}, {}));
+      const key = `${cur.id}_${cur.name}`;
+      if (!acc[key]) {
+        acc[key] = cur;
+      }
+      if (acc[key].signal < cur.signal) {
+        acc[key].signal = cur.signal
+      }
+      return acc;
+    }, {}));
   }
 }
 
