@@ -18,8 +18,8 @@
           <div class="ipfschoose">
             <p>Switch the IPFS gateway if the connection time is excessive</p>
             <form>
-              <select class="block">
-                <option selected value="https://ipfs.url.today/ipfs/">https://ipfs.url.today/ipfs/</option>
+              <select v-model="gateway" class="block">
+                <option value="https://ipfs.url.today/ipfs/">https://ipfs.url.today/ipfs/</option>
                 <option value="https://cf-ipfs.com/ipfs/">https://cf-ipfs.com/ipfs/</option>
                 <option value="https://ipfs.io/ipfs/">https://ipfs.io/ipfs/</option>
                 <option value="https://gateway.pinata.cloud/ipfs/">https://gateway.pinata.cloud/ipfs/</option>
@@ -36,10 +36,10 @@
               <p v-if="users.length > 2">Select an authorised user and enter the mnemonic phrase as a password</p>
               <p v-else>Enter the mnemonic phrase as a password for the user</p>
               <form @submit.prevent="signin">
-                <select :disabled="users.length < 2" class="block">
-                  <option 
-                    v-for="(option,index) in users" 
-                    :key="index" 
+                <select v-model="user" :disabled="users.length < 2" class="block">
+                  <option
+                    v-for="(option,index) in users"
+                    :key="index"
                     :value="option"
                   >
                     {{shortenAddress(option)}}
@@ -81,7 +81,7 @@
                       </g>
                       </svg>
 
-          
+
                 </section>
                 <app-button block :disabled="!checkmnemonic">
                   <template v-if="!processing">Sign in</template>
@@ -107,19 +107,39 @@
 </template>
 
 <script setup>
-import Header from './components/header/Header.vue'
-import Map from './components/Map.vue'
-import Footer from './components/footer/Footer.vue'
-import PointInfo from './components/pointPopup/PointPopup.vue'
-import AppButton from './components/AppButton.vue'
-import Blob from './components/Blob.vue'
+import { u8aToString } from "@polkadot/util";
+import { encodeAddress } from "@polkadot/util-crypto";
+import { jsonrepair } from "jsonrepair";
+import AppButton from "./components/AppButton.vue";
+import Blob from "./components/Blob.vue";
+import Map from "./components/Map.vue";
+import Footer from "./components/footer/Footer.vue";
+import Header from "./components/header/Header.vue";
+import PointInfo from "./components/pointPopup/PointPopup.vue";
+import { useDevices } from "./hooks/useDevices";
+import { createPair, encryptor } from "./utils/encryptor";
+import { decryptMsg, getData } from "./utils/tools";
 
-import {ref, computed, watch} from 'vue'
+import { computed, inject, ref, watch } from 'vue';
 
 // data
 // import data from './data/data.json'
 // import wifi from './data/wifi_list.json'
-import {unzipSync, strFromU8} from 'fflate'
+import { unzipSync } from 'fflate';
+
+const owner = "4Giz54KpExS9kUiiHSCmwhWroYwNmDRSzyup8pq4yEHSumGz";
+const controller = "4HWhXbRWNQdaeBbjJ2maSBZqGLa6SuANn9LWUgp3JDgdgVxN";
+const RobonomicsProvider = inject("RobonomicsProvider");
+const devices = useDevices(owner);
+const jsonData = ref();
+const gateway = ref("https://ipfs.url.today/ipfs/");
+
+watch(devices.devices, v => {
+  users.value = v;
+  if (v.length > 0) {
+    user.value = v[0];
+  }
+});
 
 /* + NOT SIGNED SCREEN */
 const appstatus = ref('init') // init, connecting, connected, signed
@@ -130,22 +150,53 @@ const screensignClass = computed( () => {
   }
 })
 const connect = () => {
-  appstatus.value = 'connecting'
+  appstatus.value = "connecting";
 
-  // Тут нужен коннект и проверка поменялся ли гейтвей 
-  // (пользователь может поменять в селекте, который показывается после 30 секунд статуса 'connecting') 
-  // я селект этот никак не реализовывала кроме верстки (там нет навешанной v-model)
-
-  // это для моих тестов
-  // в реальности этот статус должен меняться после успешной установки соединения
-  setTimeout( () => {
-    appstatus.value = 'connected'
-  }, 8000)
-}
+  watch(gateway, async value => {
+    try {
+      jsonData.value = await getData(
+        RobonomicsProvider.instance.value,
+        controller,
+        value
+      );
+      if (jsonData.value) {
+        appstatus.value = "connected";
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  const isOnce = RobonomicsProvider.isReady.value;
+  watch(
+    RobonomicsProvider.isReady,
+    async (isReady, _, stopWatch) => {
+      if (isReady) {
+        if (!isOnce) {
+          stopWatch();
+        }
+        devices.loadDevices();
+        try {
+          jsonData.value = await getData(
+            RobonomicsProvider.instance.value,
+            controller,
+            gateway.value
+          );
+          if (jsonData.value) {
+            appstatus.value = "connected";
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    },
+    { immediate: true, once: isOnce }
+  );
+};
 /* - NOT SIGNED SCREEN */
 
 /* + WORKING WITH USERS */
-const users = ['5DTestUPts3kjeXSTMyerHihn1uwMfLj8vU8sqF7qYrFabHE'] // это нужно получать из подписки
+const user = ref()
+const users = ref([]) // ['5DTestUPts3kjeXSTMyerHihn1uwMfLj8vU8sqF7qYrFabHE'] // это нужно получать из подписки
 const userpassword = ref(null)
 const typepassword = ref('password')
 const signerror = ref(null)
@@ -169,41 +220,33 @@ const togpassword = () => {
 }
 
 const signin = async () => {
-  processing.value = true
-  // тут нужна проверка подписки, юзера
-  // если получится ещё как-то проверять правда ли указанной фразой можно расшифровать аккаунт юзера (то есть правильная ли фраза), то просто замечательно
-  // setTimeout мне для теста, можно убирать в production
-  // Если ошибка:
-  setTimeout(() => {
-    signerror.value = 'Тут человеческий текст какой-то ошибки'
-    processing.value = false
-  }, 3000)
-  // Если ок:
-  setTimeout(() => {
-    // меняем статус приложения
-    appstatus.value = 'signed'
-    processing.value = false
+  processing.value = true;
 
-    // затем тут нужна подгрузка данных от робота из чейна
-    // .zip архив с такими файлами:
-    // |-- data.json
-    // |-- wifi_list.json
-    fetch("data/data.zip").then(async (response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP error: ${response.status}`);
-      }
+  const pair = createPair(userpassword.value);
+  if (encodeAddress(pair.publicKey) !== encodeAddress(user.value)) {
+    signerror.value = "Bad seed or type not ed25519";
+    processing.value = false;
+    return;
+  }
 
-      const unzipped = unzipSync(new Uint8Array(await response.arrayBuffer()))
-      data.value = JSON.parse(strFromU8(unzipped['data.json']))
-      wifi.value = JSON.parse(strFromU8(unzipped['wifi_list.json']))
+  appstatus.value = "signed";
+  processing.value = false;
 
-      getAllCoordinates(data.value, coordinates);
-      getWifiData();
-      getSpecificWifiCoordinates();
-    })
-  }, 8000)
-  
-}
+  const account = encryptor(pair);
+  const archive = decryptMsg(jsonData.value, account, controller);
+  const unzipped = unzipSync(archive);
+  try {
+    data.value = JSON.parse(jsonrepair(u8aToString(unzipped["data.json"])));
+    wifi.value = JSON.parse(
+      jsonrepair(u8aToString(unzipped["wifi_list.json"]))
+    );
+    getAllCoordinates(data.value, coordinates);
+    getWifiData();
+    getSpecificWifiCoordinates();
+  } catch (error) {
+    console.log(error);
+  }
+};
 /* - WORKING WITH USERS */
 
 const state = ref('collected');
@@ -362,7 +405,7 @@ const getSpecificWifiCoordinates = () => {
     background-color: var(--app-color-dark);
     color: var(--app-color-light);
   }
-  
+
   .screen-sign-init .welcomebot {
     margin-bottom: 4rem;
     position: relative;
@@ -424,6 +467,5 @@ const getSpecificWifiCoordinates = () => {
   }
   /* - not signed screen - connected */
 
-  
-</style>
 
+</style>
